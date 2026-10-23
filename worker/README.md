@@ -6,7 +6,7 @@
 ## Пускане през сайта на Cloudflare (без инсталиране)
 
 1. **Workers & Pages → Create → Create Worker** → име `newsdesk-api` → Deploy → **Edit code** → изтрий всичко, постави съдържанието на `worker/src/index.js` → Deploy.
-2. **Storage & databases → D1 SQL database → Create** → име `newsdesk`. (Таблицата се създава сама.)
+2. ~~D1 база~~ — вече е създадена (`newsdesk`, id `fb476de1-91c3-4229-bd40-b6c34328f0bc`) и таблицата е готова. Пропусни тази стъпка.
 3. Worker `newsdesk-api` → **Settings → Bindings → Add → D1 database** → Variable name: `DB` → избери `newsdesk` → Save.
 4. Същото място → **Variables and Secrets → Add**:
    - Text `GOOGLE_CLIENT_ID` = `1020354337477-b99a8v22upo09iil85sqn0ks1ka9onn8.apps.googleusercontent.com`

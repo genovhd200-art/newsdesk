@@ -12,4 +12,4 @@ RELAY_HOSTS = "basketnews.com,bgtennis.bg,bgvolleyball.com,bloodyelbow.com,corri
 [[d1_databases]]
 binding = "DB"
 database_name = "newsdesk"
-database_id = "ЗАМЕНИ-С-ID-ОТ-wrangler-d1-create"
+database_id = "fb476de1-91c3-4229-bd40-b6c34328f0bc"
