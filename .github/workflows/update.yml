@@ -27,8 +27,11 @@ jobs:
           python-version: "3.12"
       - name: Събери и преведи
         run: python collect.py
+        env:
+          RELAY_URL: ${{ secrets.RELAY_URL }}
+          RELAY_KEY: ${{ secrets.RELAY_KEY }}
       - name: Копирай страницата
-        run: cp index.html site/index.html
+        run: cp index.html config.js site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

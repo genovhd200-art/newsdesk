@@ -51,7 +51,7 @@ dialog input,dialog select{width:100%;padding:10px;border-radius:9px;border:1px 
 .hint{font-size:12.5px;color:var(--muted);background:var(--chip);padding:10px;border-radius:9px;margin-top:12px}
 .row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 .err{color:#ef4444;font-size:13px;margin-top:8px;min-height:18px}
-.menu{display:none}body.static #syncBtn,body.static #bdlgBtn,body.static #addBtn,body.static #adminBtn{display:none!important}body.ro .rm,body.ro #bdlgBtn{display:none!important}#adminBtn{display:none}body.adm #adminBtn{display:inline-block}.sg{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;font-size:13px}.sg b{font-size:14px}.sg small{display:block;color:var(--muted);word-break:break-all}.ok{color:#16a34a}mark{background:#fde68a;color:inherit;border-radius:3px;padding:0 2px}:root[data-theme=dark] mark{background:#854d0e}.mini{border:0;background:var(--chip);color:var(--text);border-radius:6px;cursor:pointer;margin-left:6px;padding:0 7px;font:inherit}.ed{opacity:.5;font-size:13px}.nav:hover .ed{opacity:1}dialog label.ck{display:flex;gap:8px;align-items:center;color:var(--text)}dialog label.ck input{width:auto}.qh{font-size:12px;color:var(--muted);margin-top:4px}
+.menu{display:none}body.nosugg #bdlgBtn,body.nosugg #addBtn,body.nosugg #adminBtn{display:none!important}body.noemail #s1>label,body.noemail #s1>#se,body.noemail #s1>.row,body.noemail #gwrap>.qh{display:none}body.static #syncBtn,body.static #bdlgBtn,body.static #addBtn,body.static #adminBtn{display:none!important}body.ro .rm,body.ro #bdlgBtn{display:none!important}#adminBtn{display:none}body.adm #adminBtn{display:inline-block}.sg{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;font-size:13px}.sg b{font-size:14px}.sg small{display:block;color:var(--muted);word-break:break-all}.ok{color:#16a34a}mark{background:#fde68a;color:inherit;border-radius:3px;padding:0 2px}:root[data-theme=dark] mark{background:#854d0e}.mini{border:0;background:var(--chip);color:var(--text);border-radius:6px;cursor:pointer;margin-left:6px;padding:0 7px;font:inherit}.ed{opacity:.5;font-size:13px}.nav:hover .ed{opacity:1}dialog label.ck{display:flex;gap:8px;align-items:center;color:var(--text)}dialog label.ck input{width:auto}.qh{font-size:12px;color:var(--muted);margin-top:4px}
 @media(max-width:820px){
  .app{grid-template-columns:1fr}
  aside{position:fixed;inset:0 25% 0 0;z-index:20;transform:translateX(-100%);transition:transform .2s;height:100vh}
@@ -149,11 +149,13 @@ dialog input,dialog select{width:100%;padding:10px;border-radius:9px;border:1px 
  <div class="row"><button class="btn" onclick="bdlg.close()">Затвори</button><button class="btn p" id="bsave">Импортирай</button></div>
 </dialog>
 
+<script src="config.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 // без сървър (GitHub Pages): страницата чете готов data/items.json. Вход, синхронизация и предложения се включват, като се зададе window.NEWSDESK_API
 const API=window.NEWSDESK_API||'';
 if(!API)document.body.classList.add('static');
+document.body.classList.add('nosugg');
 let adminReq=false;if(API)fetch(API+'/api/config').then(r=>r.json()).then(c=>{adminReq=c.admin_required;if(c.readonly)document.body.classList.add('ro');document.body.classList.toggle('public',adminReq&&!getTok())}).catch(()=>{});
 function getTok(){try{return localStorage.getItem('adm')||''}catch(e){return''}}
 function adm(){if(!adminReq)return{};let t=getTok();if(!t){t=window.prompt('Администраторска парола')||'';try{localStorage.setItem('adm',t)}catch(e){}}return{'X-Admin-Token':t}}
@@ -175,14 +177,14 @@ function ago(ts){const s=Date.now()/1000-ts;if(s<60)return'току-що';if(s<3
 let trc={};try{trc=JSON.parse(localStorage.getItem('trc')||'{}')}catch(e){}
 let trBusy=false;
 async function translateMissing(){
- if(!API){for(const i of S.items){const c=trc[i.link];if(c&&!i.title_bg){i.title_bg=c[0];i.summary_bg=c[1]}}return}
+ if(true){for(const i of S.items){const c=trc[i.link];if(c&&!i.title_bg){i.title_bg=c[0];i.summary_bg=c[1]}}return}
  if(trBusy||!bg)return;trBusy=true;
  try{
   const need=()=>visible().filter(i=>!i.title_bg&&!/[А-Яа-я]/.test(i.title)&&!(i._tf&&Date.now()-i._tf<60000)).slice(0,60);
   for(const i of S.items){const c=trc[i.link];if(c&&!i.title_bg){i.title_bg=c[0];i.summary_bg=c[1]}}
   let todo=need();
   const one=async b=>{
-   const r=await fetch('/api/translate',{method:'POST',body:JSON.stringify({items:b.map(i=>({t:i.title,s:i.summary}))})});
+   const r=await fetch(API+'/api/translate',{method:'POST',body:JSON.stringify({items:b.map(i=>({t:i.title,s:i.summary}))})});
    if(!r.ok)return false;
    const d=await r.json();
    b.forEach((i,k)=>{const o=d.items[k]||{};if(o.t){i.title_bg=o.t;i.summary_bg=o.s;trc[i.link]=[i.title_bg,i.summary_bg]}else i._tf=Date.now()});
@@ -354,7 +356,7 @@ side.addEventListener('click',async e=>{
  if(e.target.closest('#monAdd')){openMon();return}
  const ed=e.target.closest('[data-edit]');if(ed){e.stopPropagation();openMon(ed.dataset.edit);return}
  const rm=e.target.closest('[data-rm]');
- if(rm){e.stopPropagation();if(confirm('Премахни '+rm.dataset.rm+'?')){await api('/api/feeds?name='+encodeURIComponent(rm.dataset.rm),{method:'DELETE'});setTimeout(load,800)}return}
+ if(rm){e.stopPropagation();if(confirm('Премахни '+rm.dataset.rm+'?')){await api(API+'/api/feeds?name='+encodeURIComponent(rm.dataset.rm),{method:'DELETE'});setTimeout(load,800)}return}
  const b=e.target.closest('.nav');if(!b)return;
  S.sel={kind:b.dataset.k,v:b.dataset.v};side.classList.remove('open');render();scrollTo(0,0);translateMissing();
 });
@@ -397,7 +399,7 @@ function openAdd(){$('#ferr').className='err';$('#ferr').textContent='';dlg.show
 $('#fsave').onclick=async()=>{
  const b=$('#fsave'),e=$('#ferr');b.textContent='Проверявам…';e.className='err';e.textContent='';
  try{
-  const r=await fetch('/api/items?action=suggest',{method:'POST',body:JSON.stringify({url:$('#fu').value,name:$('#fn').value,category:$('#fc').value})});
+  const r=await fetch(API+'/api/items?action=suggest',{method:'POST',body:JSON.stringify({url:$('#fu').value,name:$('#fn').value,category:$('#fc').value})});
   const d=await r.json();
   if(!r.ok){e.textContent=d.error||'Грешка';return}
   e.className='err ok';e.textContent='Изпратено за одобрение: '+d.name+(d.sample&&d.sample.length?' · пример: '+d.sample[0]:'');
@@ -411,7 +413,7 @@ const adlg=$('#adlg');
 const admTok=()=>{try{return localStorage.getItem('adm')||''}catch(e){return''}};
 if(admTok()||location.hash==='#admin')document.body.classList.add('adm');
 async function adCall(action,body){
- const r=await fetch('/api/items?action='+action,{method:body?'POST':'GET',headers:{'X-Admin-Token':admTok()},body:body?JSON.stringify(body):undefined});
+ const r=await fetch(API+'/api/items?action='+action,{method:body?'POST':'GET',headers:{'X-Admin-Token':admTok()},body:body?JSON.stringify(body):undefined});
  return [r.status,await r.json()];
 }
 async function adLoad(){
@@ -446,7 +448,7 @@ function applyRH(){if(!RH.size)return;let ch=false;for(const i of S.items){if(!r
 function markDirty(){dirty=true}
 function touchPrefs(){PU=Date.now();try{localStorage.setItem('prefsU',String(PU))}catch(e){}markDirty()}
 function syncLabel(){const b=$('#syncBtn');b.textContent=SY?'☁ '+(SY.email.length>16?SY.email.slice(0,14)+'…':SY.email):'☁ Вход';b.classList.toggle('p',!!SY)}
-async function post(action,body){const r=await fetch('/api/items?action='+action,{method:'POST',body:JSON.stringify(body)});let d={};try{d=await r.json()}catch(e){}return [r.status,d]}
+async function post(action,body){const r=await fetch(API+'/api/items?action='+action,{method:'POST',body:JSON.stringify(body)});let d={};try{d=await r.json()}catch(e){}return [r.status,d]}
 async function syncNow(){
  if(!SY||syncing)return;syncing=true;
  try{
@@ -477,13 +479,14 @@ async function loginDone(c,d,email){
 async function initGoogle(){
  if(gInit)return;gInit=true;
  try{
-  const cfg=await (await fetch('/api/items?action=config')).json();
+  const cfg=await (await fetch(API+'/api/items?action=config')).json();
   if(!cfg.google)return;
+  if(!cfg.email)document.body.classList.add('noemail');
   await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
   google.accounts.id.initialize({client_id:cfg.google,callback:async r=>{const [c,d]=await post('login_google',{credential:r.credential});loginDone(c,d)},ux_mode:'popup'});
   google.accounts.id.renderButton($('#gbtn'),{theme:'outline',size:'large',text:'signin_with',locale:'bg',width:280});
   $('#gwrap').style.display='';
- }catch(e){gInit=false}
+ }catch(e){gInit=false;$('#serr').textContent='Не успях да заредя входа с Google. Опитай пак.'}
 }
 $('#syncBtn').onclick=()=>{showS(SY?3:1);if(!SY)initGoogle();if(SY){$('#sme').textContent=SY.email;$('#sinfo').textContent=lastSync?'Последна синхронизация: '+ago(lastSync/1000)+' по-рано':''}sdlg.showModal()};
 $('#ssend').onclick=async()=>{
@@ -507,14 +510,14 @@ syncLabel();
 if(SY)syncNow();
 setInterval(()=>{if(SY&&!document.hidden&&(dirty||Date.now()-lastSync>120000))syncNow()},20000);
 document.addEventListener('visibilitychange',()=>{if(SY&&!document.hidden&&Date.now()-lastSync>30000)syncNow()});
-addEventListener('pagehide',()=>{if(SY&&dirty){try{navigator.sendBeacon('/api/items?action=sync',JSON.stringify({uid:SY.uid,token:SY.token,data:{mon:MON,tomb:TOMB,readH:[...read].slice(-4000).map(h53),prefs:{u:PU,bg,mix:mixOn,theme:document.documentElement.dataset.theme||''}}}))}catch(e){}}});
+addEventListener('pagehide',()=>{if(SY&&dirty){try{navigator.sendBeacon(API+'/api/items?action=sync',JSON.stringify({uid:SY.uid,token:SY.token,data:{mon:MON,tomb:TOMB,readH:[...read].slice(-4000).map(h53),prefs:{u:PU,bg,mix:mixOn,theme:document.documentElement.dataset.theme||''}}}))}catch(e){}}});
 
 const bdlg=$('#bdlg');
 function openBulk(){$('#berr').textContent='';bdlg.showModal()}
 $('#bf').onchange=async e=>{const f=e.target.files[0];if(f)$('#bt').value=await f.text()};
 $('#bsave').onclick=async()=>{
  const b=$('#bsave');b.textContent='Проверявам фийдовете…';
- const r=await api('/api/bulk',{method:'POST',body:JSON.stringify({text:$('#bt').value,category:$('#bc').value})});
+ const r=await api(API+'/api/bulk',{method:'POST',body:JSON.stringify({text:$('#bt').value,category:$('#bc').value})});
  const d=await r.json();b.textContent='Импортирай';
  if(!r.ok){$('#berr').textContent=d.error;return}
  $('#berr').style.color='var(--text)';

@@ -26,9 +26,19 @@ def previous():
         return None
 
 
+def fetch_relay(f):
+    """Първо директно; ако източникът ни блокира, втори опит през Cloudflare Worker (ако е настроен)."""
+    r = core.fetch(f)
+    if not r[2]["ok"] and os.environ.get("RELAY_URL") and not f.get("sitemap") and not f.get("listing"):
+        r2 = core.fetch({**f, "_relay": True})
+        if r2[2]["ok"]:
+            return r2
+    return r
+
+
 def collect(feeds, prev):
     ex = ThreadPoolExecutor(16)
-    futs = {ex.submit(core.fetch, f): f for f in feeds}
+    futs = {ex.submit(fetch_relay, f): f for f in feeds}
     done, _ = wait(futs, timeout=120)
     ex.shutdown(wait=False, cancel_futures=True)
     now = time.time()

@@ -270,10 +270,14 @@ def fetch(feed):
         except Exception as ex:
             return feed["name"], [], {"ok": False, "error": str(ex)[:120], "at": time.time()}
     err = "unknown"
+    relay = os.environ.get("RELAY_URL", "").rstrip("/") if feed.get("_relay") else ""  # Cloudflare Worker: за сайтове, които блокират GitHub
     for ua in UAS:  # някои сайтове пускат само определен User-Agent
         try:
             url = urllib.parse.quote(feed["url"], safe=":/?&=%+#@!$'()*,;~-._")  # кирилица в адреса се кодира
-            req = urllib.request.Request(url, headers={"User-Agent": ua, "Accept": "*/*"})
+            hdr = {"User-Agent": ua, "Accept": "*/*"}
+            if relay:
+                url, hdr = relay + "/relay?u=" + urllib.parse.quote(url, safe=""), {"User-Agent": UA, "X-UA": ua, "X-Relay-Key": os.environ.get("RELAY_KEY", "")}
+            req = urllib.request.Request(url, headers=hdr)
             with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT) as r:
                 items = parse_feed(r.read(), feed)
             return feed["name"], items, {"ok": True, "count": len(items), "at": time.time()}

@@ -1,0 +1,15 @@
+name = "newsdesk-api"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+GOOGLE_CLIENT_ID = "1020354337477-b99a8v22upo09iil85sqn0ks1ka9onn8.apps.googleusercontent.com"
+# откъде се допускат заявки (адресът на сайта в GitHub Pages)
+ALLOW_ORIGIN = "https://genovhd200-art.github.io"
+# релето чете само тези сайтове (и техните поддомейни)
+RELAY_HOSTS = "basketnews.com,bgtennis.bg,bgvolleyball.com,bloodyelbow.com,corrieredellosport.it,dailymail.com,dsport.bg,espn.com,eurohoops.net,feeds.bbci.co.uk,football-italia.net,football365.com,formula1.com,gazzetta.it,gong.bg,heavy.com,insideworldfootball.com,keep.md,marca.com,mmamania.com,motorsport.com,motorsportweek.com,news.google.com,planetf1.com,racingnews365.com,skysports.com,sportal.bg,sportbible.com,tennis365.com,tenniskafe.com,tennisworlditalia.com,tuttosport.com,volleyweek.bg"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "newsdesk"
+database_id = "ЗАМЕНИ-С-ID-ОТ-wrangler-d1-create"
